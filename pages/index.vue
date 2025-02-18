@@ -3,7 +3,10 @@
     <!-- Header (fixed at the top) -->
     <header class="header">
       <div class="header__logo">
-        MyRijksApp
+        <NuxtImg
+          src="https://axeptio.imgix.net/2024/11/36e751b4-6599-44b1-a55a-99a34efebada.png?auto=format&fit=crop&w=35&h=auto&dpr=2"
+          alt="Rijksmuseum logo"
+        />
       </div>
       <div class="header__search">
         <input
@@ -20,35 +23,49 @@
           Submit
         </button>
       </div>
+      <label class="header__toggle">
+        <input
+          v-model="isSquare"
+          type="checkbox"
+        >
+        <span class="header__toggle-slider" />
+      </label>
     </header>
 
     <!-- Main content -->
     <main class="main">
-      <div class="gallery">
-        <div
-          v-for="(art, index) in items"
-          :key="index"
-          class="gallery__item"
-        >
-          <div class="gallery__image-wrapper">
-            <img
-              class="gallery__image"
-              :src="art.webImage ? art.webImage.url : ''"
-              alt="Artwork image"
+      <div
+        class="gallery"
+        :class="{ 'gallery--square': isSquare }"
+      >
+        <div class="gallery__wrapper">
+          <div class="gallery__grid">
+            <div
+              v-for="(art, index) in items"
+              :key="index"
+              class="gallery__item"
             >
-            <div class="gallery__title">
-              {{ art.title }}
+              <div class="gallery__image-wrapper">
+                <NuxtImg
+                  class="gallery__image"
+                  :src="`${art.webImage.url.replace(/=s0$/, '=s696')}`"
+                  alt="art.title"
+                />
+                <div class="gallery__title">
+                  {{ art.title }}
+                </div>
+              </div>
             </div>
+
+            <template v-if="status === 'pending'">
+              <div
+                v-for="n in pageSize"
+                :key="n"
+                class="gallery__item gallery__item--skeleton"
+              />
+            </template>
           </div>
         </div>
-
-        <template v-if="status === 'pending'">
-          <div
-            v-for="n in 20"
-            :key="n"
-            class="gallery__item gallery__item--skeleton"
-          />
-        </template>
       </div>
 
       <!-- Load more button -->
@@ -70,13 +87,30 @@ const searchTerm = ref('')
 const page = ref(1)
 const pageSize = 20
 
+const isSquare = ref(true)
+
 const { status } = await useFetch(`${apiBaseUrl}`, {
   query: {
     key: apiKey,
     p: page,
     ps: pageSize,
     imgonly: true,
+    q: searchTerm,
   },
+  // transform: (data) => {
+  //   console.log('Transform:', data)
+
+  //   return {
+  //     ...data,
+  //     artObjects: data.artObjects.map(art => ({
+  //       ...art,
+  //       webImage: {
+  //         ...webImage,
+  //         url: webImage.url.replace(/=s0$/, '=s306-c'),
+  //       },
+  //     })),
+  //   }
+  // },
   onResponse({ request, response, options }) {
     console.log('Request:', request)
     console.log('Response:', response)
@@ -95,144 +129,227 @@ function searchArtworks() {
 const loadMore = () => page.value++
 </script>
 
-  <style lang="scss" scoped>
-  /* Variables */
-  $primary-color: #333;
-  $background-color: #eee;
-  $button-color: #ddd;
-  $button-hover-color: #ccc;
-  $overlay-color: rgba(0, 0, 0, 0.6);
-  $text-color-light: #fff;
+<style lang="scss" scoped>
+/* Variables */
+$primary-color: #333;
+$background-color: #eee;
+$button-color: #ddd;
+$button-hover-color: #ccc;
+$overlay-color: rgba(0, 0, 0, 0.6);
+$text-color-light: #fff;
 
-  /* Global page styles */
-  .page {
-    margin: 0 auto;
-    font-family: sans-serif;
-    color: $primary-color;
+/* Global page styles */
+.page {
+  margin: 0 auto;
+  font-family: sans-serif;
+  color: $primary-color;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: $background-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  z-index: 10;
+
+  &__logo {
+    font-size: 1.2rem;
+    font-weight: bold;
   }
 
-  /* Header */
-  .header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background-color: $background-color;
+  &__search {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    z-index: 10;
-
-    &__logo {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    &__search {
-      display: flex;
-      gap: 5px;
-    }
-
-    &__search-input {
-      padding: 5px;
-      border: 1px solid $primary-color;
-      border-radius: 4px;
-    }
-
-    &__search-button {
-      background-color: $button-color;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      border-radius: 4px;
-
-      &:hover {
-        background-color: $button-hover-color;
-      }
-    }
+    gap: 5px;
   }
 
-  /* Main Content */
-  .main {
-    margin-top: 60px;
-    padding: 20px;
+  &__search-input {
+    padding: 5px;
+    border: 1px solid $primary-color;
+    border-radius: 4px;
   }
 
-  /* Gallery */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
+  &__search-button {
+    background-color: $button-color;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
 
-    &__item {
-      position: relative;
-      background-color: #ccc;
-      overflow: hidden;
-
-      &--skeleton {
-        min-height: 240px;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite linear;
-      }
+    &:hover {
+      background-color: $button-hover-color;
     }
-
-    &__image-wrapper {
-      position: relative;
-      width: 100%;
+  }
+  &__toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    margin-left: 15px;
+    input {
+      opacity: 0;
+      width: 0;
       height: 0;
-      padding-bottom: 100%; /* Maintain a square ratio */
+    }
+    &-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: $button-color;
+      border-radius: 28px;
+      transition: background-color 0.4s;
+      &:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.4s;
+      }
+    }
+    input:checked + .header__toggle-slider {
+      background-color: $button-hover-color;
+    }
+    input:checked + .header__toggle-slider:before {
+      transform: translateX(22px);
+    }
+  }
+}
+
+/* Main Content */
+.main {
+  margin-top: 60px;
+  padding: 20px;
+}
+
+/* Gallery Block */
+.gallery {
+  &__wrapper {
+    max-width: 1800px;    // Limit the overall gallery width
+    margin: 0 auto;       // Center the gallery horizontally
+    padding: 0 10px;      // Provide some horizontal breathing room
+  }
+
+  &__grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, 1fr); // Mobile-first: 2 columns (20 tiles => 10 rows)
+
+    @media screen and (min-width: 900px) {
+      grid-template-columns: repeat(5, 1fr); // Larger screens: 5 columns (20 tiles => 4 rows)
+    }
+  }
+
+  &__item {
+    position: relative;
+    background-color: #e4e4e4;
+    cursor: pointer;
+
+    &--skeleton {
+      min-height: 240px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite linear;
+    }
+  }
+
+  &__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%; /* Maintain a square ratio */
+  }
+
+  &__image {
+    position: absolute;
+    display: block;
+    max-width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    max-height: 100%;
+  }
+
+  &__title {
+    position: absolute;
+    word-wrap: break-word;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7); // Dark overlay for readability
+    color: white;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3; // Restrict text to 3 lines
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    opacity: 0;
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+
+  &__item:hover &__title {
+    opacity: 1;
+  }
+  &--square {
+    /* Force all images to a squared container */
+    & .gallery__image-wrapper {
+      height: 0;
+      padding-bottom: 100%; /* Creates a square ratio */
     }
 
-    &__image {
+    /* Ensure images fill the square container */
+    & .gallery__image {
       position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+  }
+}
 
-    &__title {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: $overlay-color;
-      color: $text-color-light;
-      padding: 10px;
-      max-height: 4.5em; /* ~3 lines of text */
-      overflow: hidden;
-      display: none;
-    }
+/* Button */
+.button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
 
-    &__item:hover &__title {
-      display: block;
+  &--load-more {
+    background: $button-color;
+
+    &:hover {
+      background: $button-hover-color;
     }
   }
+}
 
-  /* Button */
-  .button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-
-    &--load-more {
-      background: $button-color;
-
-      &:hover {
-        background: $button-hover-color;
-      }
-    }
+// Shimmer effect animation
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
   }
-
-  // Shimmer effect animation
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+  100% {
+    background-position: 200% 0;
   }
-  </style>
+}
+</style>
