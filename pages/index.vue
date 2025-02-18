@@ -40,28 +40,19 @@
       >
         <div class="gallery__wrapper">
           <div class="gallery__grid">
-            <div
+            <ImageTile
               v-for="(art, index) in items"
               :key="index"
               class="gallery__item"
-            >
-              <div class="gallery__image-wrapper">
-                <NuxtImg
-                  class="gallery__image"
-                  :src="`${art.webImage.url.replace(/=s0$/, '=s696')}`"
-                  alt="art.title"
-                />
-                <div class="gallery__title">
-                  {{ art.title }}
-                </div>
-              </div>
-            </div>
+              :url="art.webImage.url.replace(/=s0$/, '=s696')"
+              :title="art.title"
+              :square-tile="isSquare"
+            />
 
             <template v-if="status === 'pending'">
-              <div
+              <ImageTile
                 v-for="n in pageSize"
                 :key="n"
-                class="gallery__item gallery__item--skeleton"
               />
             </template>
           </div>
@@ -135,8 +126,6 @@ $primary-color: #333;
 $background-color: #eee;
 $button-color: #ddd;
 $button-hover-color: #ccc;
-$overlay-color: rgba(0, 0, 0, 0.6);
-$text-color-light: #fff;
 
 /* Global page styles */
 .page {
@@ -254,60 +243,8 @@ $text-color-light: #fff;
     position: relative;
     background-color: #e4e4e4;
     cursor: pointer;
-
-    &--skeleton {
-      width: 100%;
-      height: 0;
-      padding-bottom: 100%;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite linear;
-    }
   }
 
-  &__image-wrapper {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 100%; /* Maintain a square ratio */
-  }
-
-  &__image {
-    position: absolute;
-    display: block;
-    max-width: 100%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: auto;
-    max-height: 100%;
-  }
-
-  &__title {
-    position: absolute;
-    word-wrap: break-word;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.7); // Dark overlay for readability
-    color: white;
-    padding: 8px 12px;
-    font-size: 16px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3; // Restrict text to 3 lines
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    opacity: 0;
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-  }
-
-  &__item:hover &__title {
-    opacity: 1;
-  }
   &--square {
     /* Force all images to a squared container */
     & .gallery__image-wrapper {
@@ -338,20 +275,12 @@ $text-color-light: #fff;
 
   &--load-more {
     background: $button-color;
+    display: block;         // Make it a block-level element
+    margin: 20px auto;      // Center horizontally
 
     &:hover {
       background: $button-hover-color;
     }
-  }
-}
-
-// Shimmer effect animation
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
   }
 }
 </style>
