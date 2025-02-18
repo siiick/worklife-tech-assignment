@@ -10,11 +10,10 @@
       </div>
       <div class="header__search">
         <input
-          v-model="searchTerm"
+          v-model="searchInput"
           class="header__search-input"
           type="text"
           placeholder="Search"
-          @keyup.enter="searchArtworks"
         >
         <button
           class="header__search-button"
@@ -74,7 +73,8 @@
 const { public: { apiBaseUrl, apiKey } } = useRuntimeConfig()
 
 const items = ref([])
-const searchTerm = ref('')
+const searchInput = ref('')
+const searchQuery = ref('')
 const page = ref(1)
 const pageSize = 20
 
@@ -86,7 +86,7 @@ const { status } = await useFetch(`${apiBaseUrl}`, {
     p: page,
     ps: pageSize,
     imgonly: true,
-    q: searchTerm,
+    q: searchQuery,
   },
   // transform: (data) => {
   //   console.log('Transform:', data)
@@ -114,7 +114,8 @@ const { status } = await useFetch(`${apiBaseUrl}`, {
 
 function searchArtworks() {
   page.value = 1
-  fetchArtworks(true)
+  searchQuery.value = searchInput.value
+  items.value = []
 }
 
 const loadMore = () => page.value++
