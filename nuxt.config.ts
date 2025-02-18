@@ -26,6 +26,7 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
   },
+  css: ['~/assets/css/main.scss'],
   runtimeConfig: {
     public: {
       apiBaseUrl: 'https://www.rijksmuseum.nl/api/en/collection',
