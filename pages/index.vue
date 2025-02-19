@@ -16,8 +16,14 @@
           placeholder="Search"
         >
         <button
+          class="header__search-clear"
+          @click="searchArtworks(searchInput = '')"
+        >
+          <Icon name="mdi:close" />
+        </button>
+        <button
           class="header__search-button"
-          @click="searchArtworks"
+          @click="searchArtworks(searchInput)"
         >
           Submit
         </button>
@@ -55,25 +61,16 @@
               />
             </template>
           </div>
-          <!-- <div
+          <div
             v-if="items.length === 0 && status === 'success'"
             class="gallery__no-results"
           >
             No results found.
-          </div> -->
+          </div>
         </div>
       </div>
-
-      <!-- Load more button -->
-      <!-- <button
-        v-if="items.length < totalCount"
-        class="button button--load-more"
-        @click="loadMore"
-      >
-        Load more
-      </button> -->
       <button
-        v-if="true"
+        v-if="items.length < totalCount"
         class="button button--load-more"
         @click="loadMore"
       >
@@ -121,10 +118,11 @@ watch(data, async (newData) => {
 }, { immediate: true },
 )
 
-const searchArtworks = () => {
+const searchArtworks = (term: string) => {
+  if (term === searchQuery.value) return
   items.value = []
   page.value = 1
-  searchQuery.value = searchInput.value
+  searchQuery.value = term
 }
 
 const loadMore = () => page.value++
@@ -171,7 +169,25 @@ $button-hover-color: #ccc;
     border: 1px solid $primary-color;
     border-radius: 4px;
   }
+  &__search-clear {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    /* Optional: remove extra margin */
+    margin: 0;
 
+    /* Optional: adjust icon size */
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
   &__search-button {
     background-color: $button-color;
     border: none;
