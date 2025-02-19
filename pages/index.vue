@@ -55,11 +55,18 @@
               />
             </template>
           </div>
+          <div
+            v-if="items.length === 0 && status === 'success'"
+            class="gallery__no-results"
+          >
+            No results found.
+          </div>
         </div>
       </div>
 
       <!-- Load more button -->
       <button
+        v-if="items.length < totalCount"
         class="button button--load-more"
         @click="loadMore"
       >
@@ -69,13 +76,14 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 const { public: { apiBaseUrl, apiKey } } = useRuntimeConfig()
 
+const totalCount = ref<number>(0)
 const items = ref([])
-const searchInput = ref('')
-const searchQuery = ref('')
-const page = ref(1)
+const searchInput = ref<string>('')
+const searchQuery = ref<string>('')
+const page = ref<number>(1)
 const pageSize = 20
 
 const isSquare = ref(true)
@@ -88,25 +96,13 @@ const { status } = await useFetch(`${apiBaseUrl}`, {
     imgonly: true,
     q: searchQuery,
   },
-  // transform: (data) => {
-  //   console.log('Transform:', data)
 
-  //   return {
-  //     ...data,
-  //     artObjects: data.artObjects.map(art => ({
-  //       ...art,
-  //       webImage: {
-  //         ...webImage,
-  //         url: webImage.url.replace(/=s0$/, '=s306-c'),
-  //       },
-  //     })),
-  //   }
-  // },
   onResponse({ request, response, options }) {
     console.log('Request:', request)
     console.log('Response:', response)
     console.log('Options:', options)
 
+    totalCount.value = response._data.count
     items.value = [...items.value, ...response._data.artObjects]
   },
 
@@ -244,6 +240,13 @@ $button-hover-color: #ccc;
     position: relative;
     background-color: #e4e4e4;
     cursor: pointer;
+  }
+
+  &__no-results {
+    text-align: center;
+    color: $primary-color;
+    font-size: 1.2rem;
+    margin-top: 20px;
   }
 
   &--square {
