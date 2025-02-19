@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/image',
   ],
-  ssr: false,
+  ssr: true,
   devtools: { enabled: true },
   app: {
     head: {

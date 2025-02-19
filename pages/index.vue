@@ -40,7 +40,7 @@
         <div class="gallery__wrapper">
           <div class="gallery__grid">
             <ImageTile
-              v-for="(art, index) in items"
+              v-for="(art, index) in items ?? []"
               :key="index"
               class="gallery__item"
               :url="art.webImage.url.replace(/=s0$/, '=s696')"
@@ -55,18 +55,25 @@
               />
             </template>
           </div>
-          <div
+          <!-- <div
             v-if="items.length === 0 && status === 'success'"
             class="gallery__no-results"
           >
             No results found.
-          </div>
+          </div> -->
         </div>
       </div>
 
       <!-- Load more button -->
-      <button
+      <!-- <button
         v-if="items.length < totalCount"
+        class="button button--load-more"
+        @click="loadMore"
+      >
+        Load more
+      </button> -->
+      <button
+        v-if="true"
         class="button button--load-more"
         @click="loadMore"
       >
@@ -79,8 +86,18 @@
 <script lang="ts" setup>
 const { public: { apiBaseUrl, apiKey } } = useRuntimeConfig()
 
+interface Datas {
+  artObjects: ArtObject[]
+  count: number
+}
+interface ArtObject {
+  webImage: { url: string }
+  title: string
+}
+
+const items = ref<ArtObject[]>([])
 const totalCount = ref<number>(0)
-const items = ref([])
+
 const searchInput = ref<string>('')
 const searchQuery = ref<string>('')
 const page = ref<number>(1)
@@ -88,7 +105,7 @@ const pageSize = 20
 
 const isSquare = ref(true)
 
-const { status } = await useFetch(`${apiBaseUrl}`, {
+const { data, status } = await useFetch<Datas>(`${apiBaseUrl}`, {
   query: {
     key: apiKey,
     p: page,
@@ -96,22 +113,18 @@ const { status } = await useFetch(`${apiBaseUrl}`, {
     imgonly: true,
     q: searchQuery,
   },
-
-  onResponse({ request, response, options }) {
-    console.log('Request:', request)
-    console.log('Response:', response)
-    console.log('Options:', options)
-
-    totalCount.value = response._data.count
-    items.value = [...items.value, ...response._data.artObjects]
-  },
-
 })
 
-function searchArtworks() {
+watch(data, async (newData) => {
+  totalCount.value = newData?.count ?? 0
+  items.value = [...items.value, ...newData?.artObjects ?? []]
+}, { immediate: true },
+)
+
+const searchArtworks = () => {
+  items.value = []
   page.value = 1
   searchQuery.value = searchInput.value
-  items.value = []
 }
 
 const loadMore = () => page.value++
