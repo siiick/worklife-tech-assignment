@@ -14,6 +14,7 @@
           class="header__search-input"
           type="text"
           placeholder="Search"
+          @keyup.enter="searchArtworks(searchInput)"
         >
         <button
           class="header__search-clear"
@@ -23,6 +24,7 @@
         </button>
         <button
           class="header__search-button"
+          :disabled="!searchInput"
           @click="searchArtworks(searchInput)"
         >
           Submit
@@ -170,22 +172,22 @@ $button-hover-color: #ccc;
     border-radius: 4px;
   }
   &__search-clear {
-    background: transparent;
-    border: none;
-    cursor: pointer;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    /* Optional: remove extra margin */
+    background: transparent;
+    border: none;
+    cursor: pointer;
     margin: 0;
+    padding: 0;
 
-    /* Optional: adjust icon size */
+    // Scale the icon to fit
     svg {
-      width: 100%;
-      height: 100%;
+      width: 16px;
+      height: 16px;
+      fill: $primary-color; // or another contrasting color
     }
   }
   &__search-button {
