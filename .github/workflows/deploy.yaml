@@ -1,0 +1,44 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install pnpm so that the setup-node cache for pnpm works properly
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 11
+
+      # 3. Setup Node.js and enable pnpm caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      # 4. Install dependencies using pnpm
+      - name: Install dependencies
+        run: pnpm install
+
+      # 5. Build the project (ensure your build output is set to "dist")
+      - name: Build project
+        run: pnpm run build
+
+      # 6. Deploy to Cloudflare Pages using Wrangler Action
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages publish dist --project-name WORKLIFE_TECH_ASSESSMENT
