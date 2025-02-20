@@ -43,7 +43,7 @@
     <main class="main">
       <div
         class="gallery"
-        :class="{ 'gallery--square': isSquare }"
+        :class="isSquare ? 'gallery--square' : 'gallery--masonry'"
       >
         <div class="gallery__wrapper">
           <div class="gallery__grid">
@@ -171,6 +171,7 @@ $button-hover-color: #ccc;
     border: 1px solid $primary-color;
     border-radius: 4px;
   }
+
   &__search-clear {
     width: 32px;
     height: 32px;
@@ -183,13 +184,14 @@ $button-hover-color: #ccc;
     margin: 0;
     padding: 0;
 
-    // Scale the icon to fit
     svg {
-      width: 16px;
-      height: 16px;
-      fill: $primary-color; // or another contrasting color
+      /* Increase icon size to fill most of the button */
+      width: 24px;
+      height: 24px;
+      fill: $primary-color;
     }
   }
+
   &__search-button {
     background-color: $button-color;
     border: none;
@@ -201,17 +203,20 @@ $button-hover-color: #ccc;
       background-color: $button-hover-color;
     }
   }
+
   &__toggle {
     position: relative;
     display: inline-block;
     width: 50px;
     height: 28px;
     margin-left: 15px;
+
     input {
       opacity: 0;
       width: 0;
       height: 0;
     }
+
     &-slider {
       position: absolute;
       cursor: pointer;
@@ -222,6 +227,7 @@ $button-hover-color: #ccc;
       background-color: $button-color;
       border-radius: 28px;
       transition: background-color 0.4s;
+
       &:before {
         position: absolute;
         content: "";
@@ -234,9 +240,11 @@ $button-hover-color: #ccc;
         transition: transform 0.4s;
       }
     }
+
     input:checked + .header__toggle-slider {
       background-color: $button-hover-color;
     }
+
     input:checked + .header__toggle-slider:before {
       transform: translateX(22px);
     }
@@ -252,23 +260,17 @@ $button-hover-color: #ccc;
 /* Gallery Block */
 .gallery {
   &__wrapper {
-    max-width: 1800px;    // Limit the overall gallery width
+    max-width: 1800px;    // Limit overall gallery width
     margin: 0 auto;       // Center the gallery horizontally
-    padding: 0 10px;      // Provide some horizontal breathing room
+    padding: 0 10px;      // Provide horizontal breathing room
   }
 
   &__grid {
-    display: grid;
     gap: 10px;
-    grid-template-columns: repeat(2, 1fr); // Mobile-first: 2 columns (20 tiles => 10 rows)
-
-    @media screen and (min-width: 900px) {
-      grid-template-columns: repeat(5, 1fr); // Larger screens: 5 columns (20 tiles => 4 rows)
-    }
+    // No default display—layout is determined by modifier below.
   }
 
   &__item {
-    position: relative;
     background-color: #e4e4e4;
     cursor: pointer;
   }
@@ -280,22 +282,32 @@ $button-hover-color: #ccc;
     margin-top: 20px;
   }
 
+  /* Modifier for Square (grid) layout */
   &--square {
-    /* Force all images to a squared container */
-    & .gallery__image-wrapper {
-      height: 0;
-      padding-bottom: 100%; /* Creates a square ratio */
+    .gallery__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); // Mobile: 2 columns
+      @media screen and (min-width: 900px) {
+        grid-template-columns: repeat(5, 1fr); // Larger screens: 5 columns
+      }
+    }
+  }
+
+  /* Modifier for Masonry layout (CSS columns) */
+  &--masonry {
+    .gallery__grid {
+      display: block;
+      column-count: 2;    // Mobile: 2 columns
+      column-gap: 10px;
+      @media screen and (min-width: 900px) {
+        column-count: 5;  // Larger screens: 5 columns
+      }
     }
 
-    /* Ensure images fill the square container */
-    & .gallery__image {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .gallery__item {
+      display: inline-block;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      margin-bottom: 10px;
     }
   }
 }
@@ -310,7 +322,7 @@ $button-hover-color: #ccc;
 
   &--load-more {
     background: $button-color;
-    display: block;         // Make it a block-level element
+    display: block;
     margin: 20px auto;      // Center horizontally
 
     &:hover {
